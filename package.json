@@ -1,0 +1,25 @@
+{
+  "name": "nuxt-web3-whiteboard",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "node server.js",
+    "generate": "nuxt generate",
+    "postinstall": "nuxt generate"
+  },
+  "dependencies": {
+    "@nuxtjs/dotenv": "^1.4.1",
+    "axios": "^0.26.0",
+    "core-js": "^3.15.1",
+    "express": "^4.17.3",
+    "nuxt": "^2.15.7",
+    "nuxt-storage": "^1.2.2",
+    "vue-sessionstorage": "^1.0.0",
+    "vuetify": "^2.5.5"
+  },
+  "devDependencies": {
+    "@nuxtjs/vuetify": "^1.12.3"
+  }
+}
