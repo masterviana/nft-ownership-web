@@ -1,34 +1,8 @@
 <template>
   <v-row justify="center" align="center">
 
-    <v-dialog
-      v-model="dialog"
-      width="500"
-    >
-      <v-card>
-        <v-card-title class="text-h5 grey lighten-2">
-          NFT Ownership
-        </v-card-title>
-          <v-divider></v-divider>
-
-          <h3>Thanks for your participation</h3>
-
-        <v-divider></v-divider>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="primary"
-            text
-            @click="dialog = false"
-          >
-            OK
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-col cols="12" sm="8" md="6">
+  
+  <v-col cols="12" sm="8" md="6">
        <v-row> <br></v-row>
 
         <v-list three-line>
@@ -61,8 +35,32 @@
         </template>
       </v-list>
 
-      <v-row>
-        <v-btn
+      <v-row v-if="checkAlreadyVerified">
+       
+          <v-text-field
+                     v-model="username"
+                    label="Metacraft username"
+                    :rules="[rules.required, rules.counter]"
+                    required
+          ></v-text-field>
+
+          <v-btn
+            class="ma-2"
+            :disabled=!checkWallet
+            color="success"
+            @click="submitUsername()"
+          
+          >
+            {{ checkWallet ?  checkAlreadyVerified ? 'Submit username' : 'Verify NFT' : 'Connect wallet first' }}
+            <template v-slot:loader>
+              <span>Loading...</span>
+            </template>
+          </v-btn>
+        
+
+      </v-row>
+       <v-row v-else>
+           <v-btn
           class="ma-2"
           :disabled=!checkWallet
           color="success"
@@ -75,7 +73,8 @@
           </template>
         </v-btn>
 
-      </v-row>
+       </v-row>
+      
       
     </v-col>
   </v-row>
@@ -96,6 +95,11 @@ export default {
   components: {},
   data() {
     return {
+       username : '',
+       rules: {
+          required: value => !!value ||  'Required.',
+          counter: value => value.length > 5 || 'Min 5 characters',
+        },
         chainInfo : [
         {
           chainId : '0x1',
@@ -123,7 +127,7 @@ export default {
         }
       ],
       itsHover: false,
-      dialog: false,
+      dialog: true,
       totalNft : 0,
       info : '',
       defaultImage : 'https://raw.githubusercontent.com/masterviana/nft-marketplace-metadata-api/main/static/images/4.jpg',
@@ -200,6 +204,58 @@ export default {
   },
   methods: 
   {
+
+    async submitUsername()
+    {
+      console.log(' ******   submitUsername  ******* ');
+
+      if(!(this.username && this.username.length > 3)) {
+        console.error('Username arent defined ',this.username )
+        return;
+      }
+      if(!(this.account && this.account.length > 3)){
+        console.error('account arent defined ',this.account )
+        return;
+
+      }
+       if(!(this.items && this.items.length > 0)) {
+        console.error('itens arent greatter then 0 ', this.items)
+        return;
+      }
+
+       // !checkApplyButtonStatus() 
+      console.log('Store wallet and username of database ');
+
+      let self = this;
+      const BACKEND_URL = process.env.BACKEND_URL + '/api/v1/social/store'
+      const headers = {
+        "Content-Type" : 'application/json'
+      }
+      axios
+        .post(BACKEND_URL, 
+        { 
+          wallet :  this.account,
+          username : this.username,
+          items :  JSON.stringify(this.items)
+        },
+        { headers : headers})
+        .then(response => {
+          console.log('response from store on BD: ', response.data )
+          if(response.data == true)
+          {
+            console.log('Store Wallet on database' );
+            self.dialog = true;
+          }
+        })
+        .catch(error => {
+          console.log('Error Store wallet ' , error)
+          this.errored = true
+        })
+        .finally(() => console.log('finally'))
+
+
+      
+    },
    async verifyNft () 
     {
       console.log('******* verify nfts ************' );
